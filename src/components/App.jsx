@@ -5,7 +5,6 @@ import { fetchPictures } from '../api';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import Loader from 'components/Loader/Loader';
-
 export class App extends Component {
   state = {
     searchQuery: '',
@@ -79,20 +78,18 @@ export class App extends Component {
       hasMoreImages,
       showModal,
       modalImageUrl,
-      totalHits,
+      // totalHits,
     } = this.state;
 
     return (
       <div>
         <Searchbar onSearch={this.handleSearch} />
-
         {isLoading && <Loader />}
         <ImageGallery
           images={images}
           isLoading={isLoading}
           onImageClick={this.handleImageClick}
         />
-
         {showModal && (
           <Modal imageUrl={modalImageUrl} onClose={this.handleCloseModal} />
         )}
