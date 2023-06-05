@@ -4,6 +4,7 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { fetchPictures } from '../api';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
+import Loader from 'components/Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -14,35 +15,53 @@ export class App extends Component {
     hasMoreImages: false,
     showModal: false,
     modalImageUrl: '',
+    totalHits: 0,
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    const newQuery = this.state.searchQuery;
+    const newPage = this.state.currentPage;
+
+    if (
+      prevState.searchQuery !== this.state.searchQuery ||
+      prevState.currentPage !== this.state.currentPage
+    ) {
+      this.fetchPictures(newQuery, newPage);
+    }
+  }
 
   fetchPictures = async () => {
     this.setState({ isLoading: true });
-    const { searchQuery, currentPage } = this.state;
+    const { searchQuery, currentPage, totalHits } = this.state;
     const newImages = await fetchPictures(searchQuery, currentPage);
 
     this.setState(prevState => ({
       images: [...prevState.images, ...newImages],
-      currentPage: prevState.currentPage + 1,
+      totalHits: totalHits,
       hasMoreImages: newImages.length > 0,
+      // hasMoreImages: this.state.currentPage < Math.ceil(totalHits / 12),
     }));
     this.setState({ isLoading: false });
   };
 
-  handleSearch = async searchQuery => {
-    if (searchQuery.trim() === '') {
-      return;
-    }
-    this.setState(
-      { searchQuery, images: [], hasMoreImages: true, currentPage: 1 },
-      () => {
-        this.fetchPictures();
-      }
-    );
+  handleSearch = searchQuery => {
+    this.setState({
+      images: [],
+      searchQuery: searchQuery.trim(),
+      currentPage: 1,
+      hasMoreImages: false,
+    });
   };
 
   handleLoadMore = () => {
-    this.fetchPictures();
+    this.setState(
+      prevState => ({
+        currentPage: prevState.currentPage + 1,
+      }),
+      () => {
+        // this.fetchPictures();
+      }
+    );
   };
 
   handleImageClick = imageUrl => {
@@ -54,21 +73,26 @@ export class App extends Component {
   };
 
   render() {
-    const { images, isLoading, hasMoreImages, showModal, modalImageUrl } =
-      this.state;
+    const {
+      images,
+      isLoading,
+      hasMoreImages,
+      showModal,
+      modalImageUrl,
+      totalHits,
+    } = this.state;
 
     return (
       <div>
-        {/* <Searchbar onSearch={this.handleSearch} />
-        <ImageGallery images={images} isLoading={isLoading} />
-        {hasMoreImages && <Button onClick={this.handleLoadMore} />} */}
-
         <Searchbar onSearch={this.handleSearch} />
+
+        {isLoading && <Loader />}
         <ImageGallery
           images={images}
           isLoading={isLoading}
           onImageClick={this.handleImageClick}
         />
+
         {showModal && (
           <Modal imageUrl={modalImageUrl} onClose={this.handleCloseModal} />
         )}
