@@ -31,14 +31,12 @@ export class App extends Component {
 
   fetchPictures = async () => {
     this.setState({ isLoading: true });
-    const { searchQuery, currentPage, totalHits } = this.state;
-    const newImages = await fetchPictures(searchQuery, currentPage);
+    const { searchQuery, currentPage } = this.state;
+    const { hits, totalHits } = await fetchPictures(searchQuery, currentPage);
 
     this.setState(prevState => ({
-      images: [...prevState.images, ...newImages],
-      totalHits: totalHits,
-      hasMoreImages: newImages.length > 0,
-      // hasMoreImages: this.state.currentPage < Math.ceil(totalHits / 12),
+      images: [...prevState.images, ...hits],
+      hasMoreImages: this.state.currentPage < Math.ceil(totalHits / 12),
     }));
     this.setState({ isLoading: false });
   };

@@ -15,7 +15,7 @@ export const fetchPictures = async (searchQuery, page) => {
 
     const data = await response.json();
     console.log(data);
-    return data.hits;
+    return data;
   } catch (error) {
     console.log(error);
     return [];
